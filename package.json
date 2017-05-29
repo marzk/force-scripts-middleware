@@ -1,0 +1,30 @@
+{
+  "name": "force-scripts-middleware",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/marzk/force-scripts-middleware.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/marzk/force-scripts-middleware/issues"
+  },
+  "files": [
+    "index.js"
+  ],
+  "engines": {
+    "node": "> 6.0"
+  },
+  "homepage": "https://github.com/marzk/force-scripts-middleware#readme",
+  "dependencies": {
+    "composition": "^2.3.0",
+    "webpack-dev-middleware": "^1.10.2",
+    "webpack-hot-middleware": "^2.18.0"
+  }
+}
