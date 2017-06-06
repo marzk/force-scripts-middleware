@@ -1,6 +1,6 @@
 {
   "name": "force-scripts-middleware",
-  "version": "0.0.1",
+  "version": "0.0.3",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -23,8 +23,12 @@
   },
   "homepage": "https://github.com/marzk/force-scripts-middleware#readme",
   "dependencies": {
-    "composition": "^2.3.0",
+    "koa-compose": "^2.5.1",
     "webpack-dev-middleware": "^1.10.2",
     "webpack-hot-middleware": "^2.18.0"
+  },
+  "peerDependencies": {
+    "webpack": "^1.14.0",
+    "koa": "^1.0.0"
   }
 }

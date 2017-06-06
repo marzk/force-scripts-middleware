@@ -1,8 +1,10 @@
 const webpackDevMiddleware = require('webpack-dev-middleware');
 const webpackHotMiddleware = require('webpack-hot-middleware');
-const compose = require('composition');
+const compose = require('koa-compose');
 
-module.exports = function (compiler, opts) {
+module.exports = force['default'] = force;
+
+function force(compiler, opts) {
   opts = opts || {};
   // webpack config
   const config = compiler.options;
@@ -12,13 +14,11 @@ module.exports = function (compiler, opts) {
   const publicPath = opts.publicPath || config.output.publicPath || '/';
   const fs = devMiddleware.fileSystem;
 
-  return compose([
-    fileList, dev, hot
-  ]);
+  return compose([fileList, dev, hot]);
 
-  function *fileList(next) {
+  function* fileList(next) {
     if (this.path.indexOf('/__dev-server') === 0) {
-      this.type = 'text/html'; 
+      this.type = 'text/html';
       const body = [];
 
       function traverseDirectory(baseUrl, basePath) {
@@ -62,30 +62,34 @@ module.exports = function (compiler, opts) {
     yield next;
   }
 
-  function *dev(next) {
+  function* dev(next) {
     yield new Promise((resolve, reject) => {
-      devMiddleware(this.req, {
-        end: content => {
-          this.body = content; 
-          resolve();
+      devMiddleware(
+        this.req,
+        {
+          end: content => {
+            this.body = content;
+            resolve();
+          },
+          setHeader: (name, value) => {
+            if (name === 'Content-Type') {
+              this.type = value;
+            } else {
+              this.header[name] = value;
+            }
+          },
         },
-        setHeader: (name, value) => {
-          if (name === 'Content-Type') {
-            this.type = value;
-          } else {
-            this.header[name] = value;
+        err => {
+          if (err) {
+            reject(err);
           }
-        },
-      }, err => {
-        if (err) {
-          reject(err);
+          resolve(next);
         }
-        resolve(next);
-      });
+      );
     });
   }
 
-  function *hot(next) {
+  function* hot(next) {
     yield new Promise((resolve, reject) => {
       hotMiddleware(this.req, this.res, err => {
         if (err) {
