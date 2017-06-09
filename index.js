@@ -6,15 +6,24 @@ module.exports = force['default'] = force;
 
 function force(compiler, opts) {
   opts = opts || {};
-  // webpack config
-  const config = compiler.options;
+
+  let config;
+  if (compiler.compilers) {
+    // 若为multicompilers则取第一个publicPath
+    config = compiler.compilers[0].options;
+  } else {
+    config = compiler.options;
+  }
 
   const hotMiddleware = webpackHotMiddleware(compiler);
   const devMiddleware = webpackDevMiddleware(compiler, opts);
   const publicPath = opts.publicPath || config.output.publicPath || '/';
   const fs = devMiddleware.fileSystem;
 
-  return compose([fileList, dev, hot]);
+  const middlewares = compose([fileList, dev, hot]);
+  middlewares.fs = fs;
+
+  return middlewares;
 
   function* fileList(next) {
     if (this.path.indexOf('/__dev-server') === 0) {
