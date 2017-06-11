@@ -1,6 +1,7 @@
 const webpackDevMiddleware = require('webpack-dev-middleware');
 const webpackHotMiddleware = require('webpack-hot-middleware');
-const compose = require('koa-compose');
+const compose = require('composition');
+const url = require('url');
 
 module.exports = force['default'] = force;
 
@@ -15,9 +16,17 @@ function force(compiler, opts) {
     config = compiler.options;
   }
 
-  const hotMiddleware = webpackHotMiddleware(compiler);
-  const devMiddleware = webpackDevMiddleware(compiler, opts);
   const publicPath = opts.publicPath || config.output.publicPath || '/';
+  const hotMiddleware = webpackHotMiddleware(compiler);
+  const devMiddleware = webpackDevMiddleware(
+    compiler,
+    Object.assign(
+      {
+        publicPath: publicPath,
+      },
+      opts
+    )
+  );
   const fs = devMiddleware.fileSystem;
 
   const middlewares = compose([fileList, dev, hot]);
@@ -38,7 +47,7 @@ function force(compiler, opts) {
           if (fs.statSync(p).isFile()) {
             body.push(`
               <li>
-                <a href="${baseUrl + item}">${item}</a>
+                <a href="${url.resolve(baseUrl, item)}">${item}</a>
               </li>
             `);
           } else {
@@ -46,7 +55,7 @@ function force(compiler, opts) {
               <li>
                 ${item}<br />
             `);
-            traverseDirectory(`${baseUrl}${item}/`, p);
+            traverseDirectory(`${url.resolve(baseUrl, item)}/`, p);
             body.push('</li>');
           }
         });
@@ -72,7 +81,7 @@ function force(compiler, opts) {
   }
 
   function* dev(next) {
-    yield new Promise((resolve, reject) => {
+    yield new Promise(resolve => {
       devMiddleware(
         this.req,
         {
@@ -81,17 +90,10 @@ function force(compiler, opts) {
             resolve();
           },
           setHeader: (name, value) => {
-            if (name === 'Content-Type') {
-              this.type = value;
-            } else {
-              this.header[name] = value;
-            }
+            this.set(name, value);
           },
         },
-        err => {
-          if (err) {
-            reject(err);
-          }
+        () => {
           resolve(next);
         }
       );
@@ -99,13 +101,10 @@ function force(compiler, opts) {
   }
 
   function* hot(next) {
-    yield new Promise((resolve, reject) => {
-      hotMiddleware(this.req, this.res, err => {
-        if (err) {
-          reject(err);
-        }
+    yield new Promise(resolve => {
+      hotMiddleware(this.req, this.res, () => {
         resolve(next);
       });
     });
   }
-};
+}
