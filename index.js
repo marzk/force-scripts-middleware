@@ -17,7 +17,9 @@ function force(compiler, opts) {
   }
 
   const publicPath = opts.publicPath || config.output.publicPath || '/';
-  const hotMiddleware = webpackHotMiddleware(compiler);
+  const hotMiddleware = webpackHotMiddleware(compiler, {
+    heartbeat: 6000
+  });
   const devMiddleware = webpackDevMiddleware(
     compiler,
     Object.assign(
